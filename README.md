@@ -1,1 +1,1 @@
-# kmeans_hardware_generator
+# kmeans hardware generator
