@@ -366,10 +366,11 @@ class Components:
         input_controller_output_valid = m.OutputReg('input_controller_output_valid', 2)
 
         m.EmbeddedCode(' ')
-        fsm_main = m.Reg('fsm_main', 3)
+        fsm_main = m.Reg('fsm_main', 2)
         FSM_IDLE = m.Localparam('FSM_IDLE', Int(0, fsm_main.width, 10))
-        FSM_READ = m.Localparam('FSM_READ', Int(1, fsm_main.width, 10))
-        FSM_DONE = m.Localparam('FSM_DONE', Int(2, fsm_main.width, 10))
+        FSM_WAIT_DATA = m.Localparam('FSM_WAIT_DATA', Int(1, fsm_main.width, 10))
+        FSM_READ = m.Localparam('FSM_READ', Int(2, fsm_main.width, 10))
+        FSM_DONE = m.Localparam('FSM_DONE', Int(3, fsm_main.width, 10))
 
         m.EmbeddedCode(' ')
         m.Always(Posedge(clk))(
@@ -384,20 +385,32 @@ class Components:
                 Case(fsm_main)(
                     When(FSM_IDLE)(
                         If(start)(
-                            fsm_main(FSM_READ),
+                            fsm_main(FSM_WAIT_DATA),
+                        )
+                    ),
+                    When(FSM_WAIT_DATA)(
+                        If(input_controller_read_data_valid)(
+                            input_controller_request_read(Int(1, 1, 2)),
+                            fsm_main(FSM_READ)
+                        ).Elif(done_rd_data)(
+                            input_controller_output_valid(Int(2, input_controller_output_valid.width, 10)),
+                            fsm_main(FSM_DONE)
                         )
                     ),
                     When(FSM_READ)(
                         If(input_controller_read_data_valid)(
                             input_controller_data_out(input_controller_read_data),
-                            input_controller_request_read(Int(1, 1, 2)),
-                            input_controller_output_valid(Int(1, input_controller_data_out.width, 10))
+                            input_controller_output_valid(Int(1, input_controller_output_valid.width, 10)),
+                            input_controller_request_read(Int(1, 1, 2))
                         ).Elif(done_rd_data)(
+                            input_controller_output_valid(Int(2, input_controller_output_valid.width, 10)),
                             fsm_main(FSM_DONE)
+                        ).Else(
+                            fsm_main(FSM_WAIT_DATA)
                         )
                     ),
                     When(FSM_DONE)(
-                        input_controller_output_valid(Int(2, input_controller_data_out.width, 10)),
+                        input_controller_output_valid(Int(2, input_controller_output_valid.width, 10)),
                         fsm_main(FSM_DONE),
                     ),
                 )
@@ -456,6 +469,9 @@ class Components:
                             When(Int(1, output_controller_input_valid.width, 10))(  # Valid = 1
                                 output_controller_write_data(output_controller_data_in),
                                 output_controller_request_write(Int(1, 1, 10)),
+                            ),
+                            When(Int(0, output_controller_input_valid.width, 10))(
+
                             )
                         )
                     )
@@ -471,8 +487,6 @@ class Components:
                 If(rst)(
                     output_controller_request_write(Int(0, 1, 10)),
                     counter(Int(0, counter.width, 10)),
-                    data(Int(0, data.width, 10)),
-                    output_controller_write_data(Int(0, output_controller_write_data.width, 10)),
                     wr_flag(Int(0, 1, 10)),
                     output_controller_done(Int(0, 1, 10)),
                 ).Elif(AndList(start, Not(output_controller_done)))(
@@ -481,22 +495,20 @@ class Components:
                     If(output_controller_available_write)(
                         Case(output_controller_input_valid)(
                             When(Int(2, 2, 10))(  # Done = 2
-                                If(counter >= Int((external_data_width // (controller_data_width * num_inputs)) - 1,
-                                                  counter.width,
-                                                  10))(
+                                If(counter > Int((external_data_width // (controller_data_width * num_inputs)) - 1,
+                                                 counter.width,
+                                                 10))(
                                     counter(Int(0, counter.width, 10)),
-                                    output_controller_write_data(
-                                        Cat(output_controller_data_in,
-                                            data[controller_data_width * num_inputs:external_data_width])),
+                                    output_controller_write_data(data),
                                     output_controller_request_write(Int(1, 1, 10)),
                                     wr_flag(Int(1, 1, 10)),
-                                ).Elif(OrList(wr_flag, counter == Int(0, counter.width, 10)))(
+                                ).Elif(OrList(wr_flag))(
                                     output_controller_done(Int(1, 1, 10)),
                                 ).Else(
                                     counter(counter + Int(1, counter.width, 10)),
                                     data(Cat(Int(0, controller_data_width * num_inputs, 10),
                                              data[controller_data_width * num_inputs:external_data_width])),
-                                ),
+                                )
                             ),
                             When(Int(1, 2, 10))(  # Valid = 1
                                 If(counter >= Int((external_data_width // (controller_data_width * num_inputs)) - 1,
@@ -506,13 +518,16 @@ class Components:
                                     output_controller_write_data(
                                         Cat(output_controller_data_in,
                                             data[controller_data_width * num_inputs:external_data_width])),
-                                    data(Int(0, data.width, 10)),
+
                                     output_controller_request_write(Int(1, 1, 10)),
                                 ).Else(
                                     counter(counter + Int(1, counter.width, 10)),
                                     data(Cat(output_controller_data_in,
                                              data[controller_data_width * num_inputs:external_data_width])),
-                                ),
+                                )
+                            ),
+                            When(Int(0, 2, 10))(
+
                             )
                         )
                     )
@@ -522,6 +537,42 @@ class Components:
         initialize_regs(m)
         self.cache[name] = m
 
+        return m
+
+    def create_register_pipeline(self):
+        name = 'reg_pipe'
+        if name in self.cache.keys():
+            return self.cache[name]
+
+        m = Module('reg_pipe')
+        num_stages = m.Parameter('num_register', 1)
+        data_width = m.Parameter('width', 16)
+
+        clk = m.Input('clk')
+        en = m.Input('en')
+        rst = m.Input('rst')
+        data_in = m.Input('in', data_width)
+        data_out = m.Output('out', data_width)
+
+        regs = m.Reg('regs', data_width, num_stages)
+        i = m.Integer('i')
+        m.EmbeddedCode('')
+        data_out.assign(regs[num_stages - 1])
+        m.Always(Posedge(clk))(
+            If(rst)(
+                regs[0](0),
+            ).Else(
+                If(en)(
+                    regs[0](data_in),
+                    For(i(1), i < num_stages, i.inc())(
+                        regs[i](regs[i - 1])
+                    )
+                )
+            )
+        )
+
+        initialize_regs(m)
+        self.cache[name] = m
         return m
 
     def create_validity_protractor(self, k, dimensions):
@@ -543,22 +594,13 @@ class Components:
         rst = m.Input('rst')
 
         validity_protractor_input_valid = m.Input('validity_protractor_input_valid', 2)
-        validity_protractor_output_valid = m.OutputReg('validity_protractor_output_valid', 2)
+        validity_protractor_output_valid = m.Output('validity_protractor_output_valid', 2)
 
-        m.EmbeddedCode(' ')
-        m.EmbeddedCode('//Transfer of data validity control signals.')
-        valid = m.Reg('valid', dfg_depth * 2)
-        # validity_protractor_output_valid.assign(valid[0:2]),
-
-        m.Always(Posedge(clk))(
-            If(rst)(
-                valid(Int(0, valid.width, 10)),
-                validity_protractor_output_valid(Int(0, validity_protractor_output_valid.width, 10)),
-            ).Else(
-                valid(Cat(validity_protractor_input_valid, valid[2:valid.width])),
-                validity_protractor_output_valid(valid[0:2]),
-            )
-        )
+        reg_pipe = self.create_register_pipeline()
+        param = [('num_register', dfg_depth), ('width', 2)]
+        con = [('clk', clk), ('rst', rst), ('en', Int(1, 1, 2)), ('in', validity_protractor_input_valid),
+               ('out', validity_protractor_output_valid)]
+        m.Instance(reg_pipe,'reg_pipe',param,con)
 
         initialize_regs(m)
         self.cache[name] = m

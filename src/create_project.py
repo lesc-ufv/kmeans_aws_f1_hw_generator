@@ -32,7 +32,7 @@ def main():
 
     if args.output == '.':
         args.output = running_path
-
+        
     if args.dimensions and args.centroids:
         kmeansacc = KmeanAcc(512, 16, [args.centroids], args.dimensions)
 

@@ -224,7 +224,7 @@ def generate_kmeans_core(k, dimensions):
 
     # for x, reg in enumerate(regs):
     #    Node.balance(reg, accs_by_dim[x], graph)
-
+    # Node.print_dot(graph)
     return graph
 
 
