@@ -27,6 +27,8 @@
 #define RD_FILE_TIMER_ID 2
 #define CLUSTERING_TIMER_ID 3
 #define PROCESS_TIMER_ID 4
+#define UPDATE_CLUSTER_TIMER_ID 5
+#define FIRST_CPY_TIMER_ID 6
 
 using namespace std;
 using namespace std::chrono;
@@ -46,7 +48,9 @@ private:
   cl::Buffer m_input_buffer;
   cl::Buffer m_output_buffer;
   cl_int err;
-     
+
+  int m_iteration_count;
+  
   int m_num_points;
   int m_num_clusters;
   int m_num_dims;
@@ -66,6 +70,8 @@ private:
   void kmeans_process();
   
   void kmeans_set_args();
+  
+  double m_first_it;
 
 public:
         

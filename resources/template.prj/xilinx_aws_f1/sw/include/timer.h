@@ -46,8 +46,14 @@ extern int _g_timer_last_id;
   cPerfTimer *_g_timer = new cPerfTimer[(a)];                                  \
   int _g_timer_last_id = 0;
 #define TIMER_START(a)                                                         \
+  _g_timer[(a)].initialize();                                                  \
   _g_timer[(a)].start();                                                       \
   _g_timer_last_id = (a);
+
+#define TIMER_RESTART(a)                                                       \
+  _g_timer[(a)].start();                                                       \
+  _g_timer_last_id = (a);  
+
 #define TIMER_STOP _g_timer[_g_timer_last_id].stop();
 #define TIMER_STOP_ID(a) _g_timer[(a)].stop();
 #define TIMER_REPORT_MS(a) _g_timer[(a)].get_ms()

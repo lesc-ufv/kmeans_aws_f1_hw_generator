@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
     kmeans.kmeans_allocate(num_points,num_clusters,num_dims);
     kmeans.read_file(data_in_file_path);
     kmeans.kmeans_clustering(max_iterations,output_file);
-    kmeans.kmeans_deallocate();
     kmeans.kmeans_print_report();
+    kmeans.kmeans_deallocate();
     return 0;
     
 }

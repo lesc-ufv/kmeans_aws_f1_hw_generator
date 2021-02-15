@@ -9,6 +9,7 @@ def make_kmeans(external_data_width, data_width, k, sumK, dimensions, components
 
     controller_data_width = 8
     kmeans_cores = (external_data_width // data_width) // dimensions
+        
     params = []
 
     # sinais básicos para o funcionamento do circuito
