@@ -1,18 +1,18 @@
 /**
-* Copyright (C) 2020 Xilinx, Inc
-*
-* Licensed under the Apache License, Version 2.0 (the "License"). You may
-* not use this file except in compliance with the License. A copy of the
-* License is located at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-* License for the specific language governing permissions and limitations
-* under the License.
-*/
+ * * Copyright (C) 2020 Xilinx, Inc
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License"). You may
+ * * not use this file except in compliance with the License. A copy of the
+ * * License is located at
+ * *
+ * *     http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * * License for the specific language governing permissions and limitations
+ * * under the License.
+ * */
 
 #pragma once
 
@@ -52,8 +52,8 @@ extern int _g_timer_last_id;
 
 #define TIMER_RESTART(a)                                                       \
   _g_timer[(a)].start();                                                       \
-  _g_timer_last_id = (a);  
-
+  _g_timer_last_id = (a);
+  
 #define TIMER_STOP _g_timer[_g_timer_last_id].stop();
 #define TIMER_STOP_ID(a) _g_timer[(a)].stop();
 #define TIMER_REPORT_MS(a) _g_timer[(a)].get_ms()
@@ -65,3 +65,4 @@ extern int _g_timer_last_id;
 #define TIMER_STOP_ID(a)
 #define TIMER_REPORT(a)
 #endif
+

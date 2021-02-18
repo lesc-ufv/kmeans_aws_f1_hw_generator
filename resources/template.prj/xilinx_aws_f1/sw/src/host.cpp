@@ -8,7 +8,6 @@ int main(int argc, char **argv) {
     std::string data_in_file_path;
     std::string output_file;
     std::string binaryFile;
-    
     if (argc > 6) {
         binaryFile = argv[1];
         num_points = atoi(argv[2]);

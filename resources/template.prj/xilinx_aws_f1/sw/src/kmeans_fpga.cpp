@@ -261,7 +261,7 @@ int KmeansFpga::kmeans_print_report() {
     printf("  Device Initialization      : %12.4f ms\n", TIMER_REPORT_MS(INIT_TIMER_ID));
     printf("  Buffer Allocation          : %12.4f ms\n", TIMER_REPORT_MS(ALLOCATE_TIMER_ID));
     printf("  Iteration:                 : %12.4f ms\n", TIMER_REPORT_MS(PROCESS_TIMER_ID));
-    printf("  Iteration count            : %12d     \n", m_iteration_count);
+    printf("  Iteration count            : %16d     \n", m_iteration_count);
     printf("  Update clusters            : %12.4f ms\n", TIMER_REPORT_MS(UPDATE_CLUSTER_TIMER_ID));
     printf("  Clusterization             : %12.4f ms\n", TIMER_REPORT_MS(CLUSTERING_TIMER_ID));
     printf("------------------------------------------------------\n");
