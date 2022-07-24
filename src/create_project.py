@@ -18,7 +18,9 @@ def create_args():
     parser = argparse.ArgumentParser('create_project -h')
     parser.add_argument('-N', '--dimensions', help='Number of Kmeans dimensions', type=int)
     parser.add_argument('-K', '--centroids', help='Number of Kmeans clusters', type=int)
+    parser.add_argument('-c', '--copies', help='Number of KmeansAcc copies', type=int, default=1)
     parser.add_argument('-p', '--name', help='Project name', type=str, default='a.prj')
+
     parser.add_argument('-o', '--output', help='Project location', type=str, default='.')
 
     return parser.parse_args()
@@ -34,7 +36,7 @@ def main():
         args.output = running_path
         
     if args.dimensions and args.centroids:
-        kmeansacc = KmeanAcc(512, 16, [args.centroids], args.dimensions)
+        kmeansacc = KmeanAcc(512, 16, [args.centroids], args.dimensions, args.copies)
 
         acc_axi = AccAXIInterface(kmeansacc).create_kernel_top()
 
