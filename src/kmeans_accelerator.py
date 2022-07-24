@@ -46,7 +46,7 @@ class KmeanAcc:
         acc_user_read_data = m.Input('acc_user_read_data', Mul(self.num_in,self.external_data_width))
         acc_user_request_read = m.Output('acc_user_request_read',self.num_in)
         acc_user_read_data_valid = m.Input('acc_user_read_data_valid',self.num_in)
-        acc_user_available_write = m.Input('acc_user_available_write'self.num_out)
+        acc_user_available_write = m.Input('acc_user_available_write',self.num_out)
         acc_user_write_data = m.Output('acc_user_write_data', Mul(self.num_out,self.external_data_width))
         acc_user_request_write = m.Output('acc_user_request_write',self.num_out)
         acc_user_done = m.Output('acc_user_done')
