@@ -2,7 +2,9 @@
 
 ### Abstract:
 
+<p align="justify">
 Nowadays, FPGAs play an essential role in domain-specific hardware accelerators due to their power efficiency and flexibility. Nevertheless, FPGA programming and deploying are still a challenge. We present an accelerator generator targeting Amazon Web Services (AWS) Cloud FPGAs. We validate our generator with the K-means clustering algorithm as a case study. The main contribution of this work is to present an opensource full-stack generator using AWS EC2 F1 cloud FPGAs. Our framework is parameterizable and generates Verilog code for the entire design, including DDR memory and FPGA communication. Furthermore, we use a modular design approach, allowing extensions to address other applications. Compared to the Intel/Altera Harpv2 cloud FPGA, our AWS accelerator is on average twice faster for the K-means case study.
+</p>
 
 ### Cite this:
 
